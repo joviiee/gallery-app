@@ -1,0 +1,6 @@
+myenv/
+gallery_app_env/
+media/
+db*
+__pycache__/
+migrations/

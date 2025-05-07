@@ -1,0 +1,90 @@
+{% extends "layout.html" %}
+{% load static %}
+
+
+{% block navbar %}
+<div style = "display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background-color:rgb(66, 66, 66);
+    font-weight: bold;
+    ">
+    {% if user.is_authenticated %}
+      <span style = "font-size:40px;paading-bottom:10px">Hello {{ user.username }}</span>
+      <a style = "margin-left: 10px;
+    text-decoration: none;
+    color:rgb(255, 0, 0);
+    font-size:20px;" href="{% url 'logout' %}">Logout</a>
+    {% else %}
+      <span style = "font-size:40px;paading-bottom:10px">👋 Welcome!</span>
+      <div>
+        <a href="{% url 'login' %}">Login  |</a>
+        <a href="{% url 'signup' %}">    Sign Up</a>
+      </div>
+    {% endif %}
+  </div>
+{% endblock navbar %}
+{% block content %}
+
+<div class="slider">
+    <ul class="slides">
+        <li>
+            <img src="{% static 'images/style2.jpeg' %}" alt="Django Photo Gallery" class="opaque">
+            <div class="caption center-align">
+                <h1>
+                    Curated fashion albums from rising and iconic creators across the globe.<br/>
+                    <small class="light text-lighten-3 hide-on-small-only">Featured Fashion Albums</small>
+                </h1>
+            </div>
+        </li>
+        <li>
+            <img src="{% static 'images/style1.jpeg' %}" alt="Django Photo Gallery" class="opaque">
+            <div class="caption left-align">
+                <h1>
+                    Explore trendsetting looks and creative visions from our growing community of fashion creators.<br />
+                    <small class="light text-lighten-3 hide-on-small-only">Optimized images to load on every device.</small>
+                </h1>
+            </div>
+        </li>
+    </ul>
+</div>
+<div class="container">
+    <div class="row">
+        {% for album in albums %}
+
+        <div class="col">
+            <div class="card dpg-album-card">
+                <div style="width: 300px; height: 200px; overflow: hidden;" class="card-image">
+                    <img src="{{ album.thumb.url }}" alt="{{ album.title }}" class="dpg-album-card-image" />
+                </div>
+                <div class="card-content">
+                    <span class="card-title">{{ album.title }}</span>
+                    <p>{{ album.description|truncatechars:120 }}</p>
+                </div>
+                <div class="card-action">
+                    <a href="{% url 'album' album.slug %}">
+                        More Images
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {% endfor %}
+
+    </div>
+</div>
+
+<div class="pagination center">
+    <span class="step-links">
+        {% if albums.has_previous %}
+        <a href="?page={{ albums.previous_page_number }}" class="waves-effect waves-light btn btn-large">Previous</a>
+        {% endif %}
+
+        {% if albums.has_next %}
+        <a href="?page={{ albums.next_page_number }}" class="waves-effect waves-light btn btn-large">Next</a>
+        {% endif %}
+    </span>
+</div>
+
+{% endblock %}

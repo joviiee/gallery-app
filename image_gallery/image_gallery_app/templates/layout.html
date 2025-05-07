@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> {% load static %} {% include 'material/includes/material_css.html' %}
+    <link rel="stylesheet" href="{% static 'site.css' %}" type="text/css" /> {% block css %}{% endblock %}
+    {% block looks %}{% endblock looks %}
+    <style>
+        body {
+            background-color: #eef2f3;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .form-container {
+            width: 800px;
+            margin: 100px auto;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            font-size: 26px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 16px;
+            color: #444;
+            display: block;
+            margin-top: 15px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .errorlist {
+            color: red;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .form-input {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    </style>
+</head>
+
+<body>
+    <nav style="height:100px"role="navigation">
+        {% block navbar %}
+        
+        
+        {% endblock navbar %}
+    </nav>
+
+    {% block content %}{% endblock content %}
+    <br>
+    <div class="form-container">
+        <h2>Leave us your feedback</h2>
+        <form method="post">
+            {% csrf_token %}
+    
+            <div>
+                <label for="id_name">Name:</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="errorlist">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+    
+            <div>
+                <label for="id_email">Email:</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="errorlist">{{ form.email.errors }}</div>
+                {% endif %}
+            </div>
+    
+            <div>
+                <label for="id_message">Message:</label>
+                {{ form.message }}
+                {% if form.message.errors %}
+                    <div class="errorlist">{{ form.message.errors }}</div>
+                {% endif %}
+            </div>
+    
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <footer class="page-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col l6 s12">
+                    <a href="https://github.com/helensteve" target="_blank">
+                        <img src="{% static 'social/social-github.svg' %}" class="dpg-icon" alt="Django Photo Gallery Github" />
+                    </a>
+                    <a href="https://www.linkedin.com/in/helensteve" target="_blank">
+                        <img src="{% static 'social/social-linkedin.svg' %}" class="dpg-icon" alt="Django Photo Gallery Linkedin" />
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            <div class="container">
+                © 2017 Copyright Helen
+                <a class="grey-text text-lighten-4 right" href="#!">Sample created by Helen</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'material/js/jquery-2.2.0.js' %}"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script> -->
+    {% include 'material/includes/material_js.html' %}
+    <script src="{% static 'app.js' %}"></script> {% block js %}{% endblock %}
+</body>
+
+</html>
