@@ -156,26 +156,21 @@
     </div>
     {% endblock feedback_form %}
 
-    <footer class="page-footer">
+    <footer class="page-footer grey darken-3" style="padding: 20px 0; color: #ccc;">
         <div class="container">
-            <div class="row">
-                <div class="col l6 s12">
-                    <a href="https://github.com/helensteve" target="_blank">
-                        <img src="{% static 'social/social-github.svg' %}" class="dpg-icon" alt="Django Photo Gallery Github" />
-                    </a>
-                    <a href="https://www.linkedin.com/in/helensteve" target="_blank">
-                        <img src="{% static 'social/social-linkedin.svg' %}" class="dpg-icon" alt="Django Photo Gallery Linkedin" />
-                    </a>
-                </div>
+          <div class="row">
+            <div class="col s12 m6">
+              <h6 style="margin-bottom: 10px; font-weight: bold;">About Us</h6>
+              <p style="font-size: 0.9rem; line-height: 1.5;">
+                GalleryApp is a minimalist photo sharing platform crafted for creators. We believe in simplicity, speed, and stunning image experiences.
+              </p>
             </div>
+            <div class="col s12 m6 right-align">
+              <p style="font-size: 0.8rem;">&copy; 2025 GalleryApp. All rights reserved.</p>
+            </div>
+          </div>
         </div>
-        <div class="footer-copyright">
-            {% comment %} <div class="container">
-                © 2017 Copyright Helen
-                <a class="grey-text text-lighten-4 right" href="#!">Sample created by Helen</a>
-            </div> {% endcomment %}
-        </div>
-    </footer>
+      </footer>
 
     <script src="{% static 'material/js/jquery-2.2.0.js' %}"></script>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script> -->

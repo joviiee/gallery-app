@@ -30,3 +30,10 @@ class FeedbackForm(forms.ModelForm):
         widgets = {
     'message': forms.Textarea(attrs={'class': 'message-box'})
 }
+        
+
+class AlbumRatingForm(forms.Form):
+    rating = forms.ChoiceField(
+        choices=[(i, str(i)) for i in range(1, 6)],
+        widget=forms.RadioSelect
+    )

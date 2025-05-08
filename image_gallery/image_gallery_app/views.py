@@ -10,13 +10,14 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import DetailView
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, logout, authenticate,get_user
-from image_gallery_app.models import Album, AlbumImage
+from image_gallery_app.models import Album, AlbumImage ,AlbumRating
 from .forms import SignupForm, LoginForm, FeedbackForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils.text import slugify
 from django.core.files.base import ContentFile
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from PIL import Image
 
@@ -69,29 +70,56 @@ def gallery(request):
         'form': form,
         'user_favorites': user_favorites
     })
-class AlbumDetail(DetailView):
-     model = Album
-     template_name = 'image_gallery_app/album_detail.html'
+class AlbumDetail(LoginRequiredMixin, DetailView):
+    model = Album
+    template_name = 'image_gallery_app/album_detail.html'
+    context_object_name = 'album'
 
-     def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super(AlbumDetail, self).get_context_data(**kwargs)
-        # Add in a QuerySet of all the images
-        context['images'] = AlbumImage.objects.filter(album=self.object.id)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        album = self.get_object()
+
+        # Images
+        context['images'] = AlbumImage.objects.filter(album=album)
+
+        # Feedback Form
         context['form'] = FeedbackForm()
-        return context
-     
-     def post(self, request, *args, **kwargs):
-        form = FeedbackForm(request.POST)
-        if form.is_valid():
-            # Optionally save feedback or perform additional actions
-            # Redirect to the feedback success page after successful form submission
-            return redirect('feedback_success')  # Redirect to the success page
 
-        # If form is invalid, re-render the page with the form and errors
-        context = self.get_context_data(**kwargs)
-        context['form'] = form
-        return self.render_to_response(context)
+        # User Rating
+        user = self.request.user
+        user_rating = None
+        if user.is_authenticated:
+            user_rating = AlbumRating.objects.filter(user=user, album=album).first()
+        context['user_rating'] = user_rating
+
+        # Average Rating
+        context['average_rating'] = album.average_rating()
+        context["rating_range"] = [5, 4, 3, 2, 1]
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if 'rating' in request.POST:
+            # Star rating form submitted
+            rating = int(request.POST.get('rating'))
+            AlbumRating.objects.update_or_create(
+                user=request.user,
+                album=self.object,
+                defaults={'rating': rating}
+            )
+            return redirect(self.request.path_info)  # refresh page
+
+        else:
+            # Feedback form submitted
+            form = FeedbackForm(request.POST)
+            if form.is_valid():
+                # Save or process the feedback as needed
+                return redirect('feedback_success')
+            
+            context = self.get_context_data(**kwargs)
+            context['form'] = form
+            return self.render_to_response(context)
      
 def custom_signup(request):
     if request.method == 'POST':

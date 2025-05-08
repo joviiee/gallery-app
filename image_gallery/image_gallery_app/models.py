@@ -20,11 +20,22 @@ class Album(models.Model):
     modified = models.DateTimeField(auto_now_add=True)
     slug = models.SlugField(max_length=50, unique=True)
 
-    #def get_absolute_url(self):
-    #    return reverse('album', kwargs={'slug':self.slug})
+    def average_rating(self):
+        ratings = self.ratings.all()
+        if ratings:
+            return sum(r.rating for r in ratings) / len(ratings)
+        return 0
 
     def __unicode__(self):
         return self.title
+    
+class AlbumRating(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name='ratings')
+    rating = models.PositiveSmallIntegerField()  # 1 to 5 stars
+
+    class Meta:
+        unique_together = ('user', 'album')  # One rating per user per album
 
 class AlbumImage(models.Model):
     image = ProcessedImageField(upload_to='albums', processors=[ResizeToFit(1280)], format='JPEG', options={'quality': 70})
