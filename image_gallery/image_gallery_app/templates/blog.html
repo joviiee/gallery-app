@@ -1,0 +1,139 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block content %}
+<style>
+  .blog-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+  }
+
+  .blog-post {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+  }
+
+  .blog-post:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  }
+
+  .blog-post img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .blog-post:hover img {
+    transform: scale(1.05);
+  }
+
+  .blog-post-content {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .blog-post h2 {
+    margin: 0 0 8px;
+    font-size: 22px;
+    color: #222;
+    transition: color 0.3s ease;
+  }
+
+  .blog-post:hover h2 {
+    color: #007bff;
+  }
+
+  .blog-post small {
+    color: #777;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .blog-post p {
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: auto;
+  }
+
+  .blog-post a {
+    text-align: right;
+    color: #007bff;
+    font-weight: bold;
+    margin-top: 15px;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .blog-post a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+  }
+
+  .card-action {
+    margin-top: 20px;
+  }
+
+  .fav-btn {
+    background: none;
+    border: none;
+    color: #e63946;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.2s ease;
+  }
+
+  .fav-btn:hover {
+    transform: scale(1.1);
+  }
+</style>
+
+<div class="blog-container">
+  <h1 style="text-align:center; margin-bottom: 40px;">Latest Blog Posts</h1>
+  <div class="blog-grid">
+    {% for blog in blogs %}
+      <div class="blog-post">
+        <img src="{{ blog.image.url }}" alt="{{ blog.title }}">
+        <div class="blog-post-content">
+          <h2>{{ blog.title }}</h2>
+          <small>By {{ blog.author }} | {{ blog.created|date:"F j, Y" }}</small>
+          <p>{{ blog.content|truncatewords:30 }}</p>
+          <div class="card-action" style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="{% url 'blog_detail' blog.slug %}">Read More</a>
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'toggle_favorite' 'blog' blog.id %}" style="margin: 0;">
+              {% csrf_token %}
+              <button type="submit" class="fav-btn">
+                {% if blog.id in user_favorites %}
+                  <i class="fas fa-heart"></i>
+                {% else %}
+                  <i class="far fa-heart"></i>
+                {% endif %}
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>No blog posts found.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

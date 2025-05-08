@@ -7,30 +7,6 @@
 {% endblock %}
 
 
-{% block navbar %}
-<div style = "display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 20px;
-    background-color:rgb(66, 66, 66);
-    font-weight: bold;
-    ">
-    {% if user.is_authenticated %}
-      <span style = "font-size:40px;paading-bottom:10px">Hello {{ user.username }}</span>
-      <a style = "margin-left: 10px;
-    text-decoration: none;
-    color:rgb(255, 0, 0);
-    font-size:20px;" href="{% url 'logout' %}">Logout</a>
-    {% else %}
-      <span style = "font-size:40px;paading-bottom:10px">👋 Welcome!</span>
-      <div>
-        <a href="{% url 'login' %}">Login  |</a>
-        <a href="{% url 'signup' %}">    Sign Up</a>
-      </div>
-    {% endif %}
-  </div>
-{% endblock navbar %}
-
 {% block content %}
 
     {% if album.is_visible %}

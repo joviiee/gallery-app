@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> {% load static %} {% include 'material/includes/material_css.html' %}
     <link rel="stylesheet" href="{% static 'site.css' %}" type="text/css" /> {% block css %}{% endblock %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     {% block looks %}{% endblock looks %}
     <style>
         body {
@@ -76,11 +77,42 @@
         border-radius: 5px;
     }
 
+    .message-box {
+        height: 200px;
+        resize: vertical; /* optional */
+    }
+
     </style>
 </head>
 
 <body>
     <nav style="height:100px"role="navigation">
+        <div style="display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background-color:rgb(66, 66, 66);
+    font-weight: bold;
+    color: white;
+">
+    {% if user.is_authenticated %}
+      <span style="font-size: 30px;">Hello {{ user.username }}</span>
+      <div style="display: flex; gap: 45px; align-items: center;">
+        <a href="{% url 'gallery' %}" style="text-decoration: none; color: white; font-size: 18px;">Gallery</a>
+        <a href="{% url 'blog' %}" style="text-decoration: none; color: white; font-size: 18px;">Blog</a>
+        <a href="{% url 'favourites' %}" style="text-decoration: none; color: white; font-size: 18px;">Favourites</a>
+        <a href="{% url 'create_album' %}" style="text-decoration: none; color: white; font-size: 18px;">Create</a>
+        <a href="{% url 'logout' %}" style="text-decoration: none; color: rgb(255, 0, 0); font-size: 18px;">Logout</a>
+      </div>
+    {% else %}
+      <span style="font-size: 30px;">Welcome!</span>
+      <div style="display: flex; gap: 10px;">
+        <a href="{% url 'login' %}" style="text-decoration: none; color: white; font-size: 18px;">Login</a>
+        <span style="color: white;">|</span>
+        <a href="{% url 'signup' %}" style="text-decoration: none; color: white; font-size: 18px;">Sign Up</a>
+      </div>
+    {% endif %}
+</div>
         {% block navbar %}
         
         
@@ -89,6 +121,7 @@
 
     {% block content %}{% endblock content %}
     <br>
+    {% block feedback_form %}
     <div class="form-container">
         <h2>Leave us your feedback</h2>
         <form method="post">
@@ -121,6 +154,7 @@
             <button type="submit">Submit</button>
         </form>
     </div>
+    {% endblock feedback_form %}
 
     <footer class="page-footer">
         <div class="container">

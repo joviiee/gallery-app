@@ -17,7 +17,11 @@ urlpatterns = [
     path('accounts/login/', view.custom_login, name='login'),
     path('accounts/signup/', view.custom_signup, name='signup'),
     path('logout/', view.logout_view, name='logout'),
-    # path('feedback/', view.feedback_view, name='feedback'),
+    path('blog/', view.blog_view, name='blog'),
+    path('blog/<slug:slug>/', view.blog_detail, name='blog_detail'),
+    path('create_album/', view.create_album_view, name='create_album'),
+    path('favourites/', view.favorites_view, name='favourites'),
+    path('favorite/<str:item_type>/<int:item_id>/', view.toggle_favorite, name='toggle_favorite'),
     path('feedback-success/', view.feedback_success, name='feedback_success'),  # Success page URL
 
     path('', view.gallery, name='gallery'),

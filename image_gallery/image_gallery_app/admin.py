@@ -59,3 +59,7 @@ class AlbumModelAdmin(admin.ModelAdmin):
 class AlbumImageModelAdmin(admin.ModelAdmin):
     list_display = ('alt', 'album')
     list_filter = ('album', 'created')
+
+from .models import Blog
+
+admin.site.register(Blog)

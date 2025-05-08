@@ -6,11 +6,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
 class AlbumForm(forms.ModelForm):
+    zip = forms.FileField(required=False, help_text="Optional .zip file of images to add to this album")
     class Meta:
         model = Album
-        exclude = []
-
-    zip = forms.FileField(required=False)
+        exclude = ['slug', 'created', 'modified']
 
 class SignupForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -27,4 +26,7 @@ class LoginForm(forms.Form):
 class FeedbackForm(forms.ModelForm):
     class Meta:
         model = Feedback
-        fields = ['name', 'email', 'message']
+        fields = ['name', 'email', "message"]
+        widgets = {
+    'message': forms.Textarea(attrs={'class': 'message-box'})
+}

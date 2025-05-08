@@ -1,90 +1,161 @@
 {% extends "layout.html" %}
 {% load static %}
 
+{% block content %}
+<style>
+  .album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+    padding: 40px 0;
+  }
 
-{% block navbar %}
-<div style = "display: flex;
+  .dpg-album-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .dpg-album-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+  }
+
+  .dpg-album-card .card-image img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .dpg-album-card .card-content {
+    padding: 16px;
+    flex-grow: 1;
+  }
+
+  .dpg-album-card .card-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+  }
+
+  .dpg-album-card .card-content p {
+    font-size: 14px;
+    color: #666;
+  }
+
+  .card-action {
+    border-top: 1px solid #eee;
+    padding: 12px 16px;
+    display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 20px;
-    background-color:rgb(66, 66, 66);
-    font-weight: bold;
-    ">
-    {% if user.is_authenticated %}
-      <span style = "font-size:40px;paading-bottom:10px">Hello {{ user.username }}</span>
-      <a style = "margin-left: 10px;
-    text-decoration: none;
-    color:rgb(255, 0, 0);
-    font-size:20px;" href="{% url 'logout' %}">Logout</a>
-    {% else %}
-      <span style = "font-size:40px;paading-bottom:10px">👋 Welcome!</span>
-      <div>
-        <a href="{% url 'login' %}">Login  |</a>
-        <a href="{% url 'signup' %}">    Sign Up</a>
-      </div>
-    {% endif %}
-  </div>
-{% endblock navbar %}
-{% block content %}
+  }
+
+  .fav-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .fav-btn i {
+    transition: transform 0.2s ease;
+  }
+
+  .fav-btn:hover i {
+    transform: scale(1.2);
+  }
+
+  .pagination.center {
+    margin: 40px auto;
+    text-align: center;
+  }
+
+  .slider h1 {
+    font-size: 28px;
+    line-height: 1.4;
+    color: white;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+
+  .slider small {
+    font-size: 16px;
+    display: block;
+    margin-top: 8px;
+  }
+</style>
 
 <div class="slider">
-    <ul class="slides">
-        <li>
-            <img src="{% static 'images/style2.jpeg' %}" alt="Django Photo Gallery" class="opaque">
-            <div class="caption center-align">
-                <h1>
-                    Curated fashion albums from rising and iconic creators across the globe.<br/>
-                    <small class="light text-lighten-3 hide-on-small-only">Featured Fashion Albums</small>
-                </h1>
-            </div>
-        </li>
-        <li>
-            <img src="{% static 'images/style1.jpeg' %}" alt="Django Photo Gallery" class="opaque">
-            <div class="caption left-align">
-                <h1>
-                    Explore trendsetting looks and creative visions from our growing community of fashion creators.<br />
-                    <small class="light text-lighten-3 hide-on-small-only">Optimized images to load on every device.</small>
-                </h1>
-            </div>
-        </li>
-    </ul>
+  <ul class="slides">
+    <li>
+      <img src="{% static 'images/style2.jpeg' %}" alt="Django Photo Gallery" class="opaque">
+      <div class="caption center-align">
+        <h1>
+          Curated fashion albums from rising and iconic creators across the globe.<br />
+          <small class="light text-lighten-3 hide-on-small-only">Featured Fashion Albums</small>
+        </h1>
+      </div>
+    </li>
+    <li>
+      <img src="{% static 'images/style1.jpeg' %}" alt="Django Photo Gallery" class="opaque">
+      <div class="caption left-align">
+        <h1>
+          Explore trendsetting looks and creative visions from our growing community of fashion creators.<br />
+          <small class="light text-lighten-3 hide-on-small-only">Optimized images to load on every device.</small>
+        </h1>
+      </div>
+    </li>
+  </ul>
 </div>
+
 <div class="container">
-    <div class="row">
-        {% for album in albums %}
-
-        <div class="col">
-            <div class="card dpg-album-card">
-                <div style="width: 300px; height: 200px; overflow: hidden;" class="card-image">
-                    <img src="{{ album.thumb.url }}" alt="{{ album.title }}" class="dpg-album-card-image" />
-                </div>
-                <div class="card-content">
-                    <span class="card-title">{{ album.title }}</span>
-                    <p>{{ album.description|truncatechars:120 }}</p>
-                </div>
-                <div class="card-action">
-                    <a href="{% url 'album' album.slug %}">
-                        More Images
-                    </a>
-                </div>
-            </div>
+  <div class="album-grid">
+    {% for album in albums %}
+      <div class="card dpg-album-card">
+        <div class="card-image">
+          <img src="{{ album.thumb.url }}" alt="{{ album.title }}">
         </div>
-
-        {% endfor %}
-
-    </div>
+        <div class="card-content">
+          <span class="card-title">{{ album.title }}</span>
+          <p>{{ album.description|truncatechars:120 }}</p>
+        </div>
+        <div class="card-action">
+          <a href="{% url 'album' album.slug %}">
+            More Images
+          </a>
+          {% if user.is_authenticated %}
+            <form method="post" action="{% url 'toggle_favorite' 'album' album.id %}">
+              {% csrf_token %}
+              <button type="submit" class="fav-btn" title="Toggle Favorite">
+                {% if album.id in user_favorites %}
+                  <i class="fas fa-heart" style="color: red; font-size: 20px;"></i>
+                {% else %}
+                  <i class="far fa-heart" style="color: red; font-size: 20px;"></i>
+                {% endif %}
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
 </div>
 
 <div class="pagination center">
-    <span class="step-links">
-        {% if albums.has_previous %}
-        <a href="?page={{ albums.previous_page_number }}" class="waves-effect waves-light btn btn-large">Previous</a>
-        {% endif %}
-
-        {% if albums.has_next %}
-        <a href="?page={{ albums.next_page_number }}" class="waves-effect waves-light btn btn-large">Next</a>
-        {% endif %}
-    </span>
+  <span class="step-links">
+    {% if albums.has_previous %}
+      <a href="?page={{ albums.previous_page_number }}" class="waves-effect waves-light btn btn-large">Previous</a>
+    {% endif %}
+    {% if albums.has_next %}
+      <a href="?page={{ albums.next_page_number }}" class="waves-effect waves-light btn btn-large">Next</a>
+    {% endif %}
+  </span>
 </div>
-
 {% endblock %}
