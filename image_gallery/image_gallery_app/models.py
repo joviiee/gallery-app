@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.apps import apps
+from datetime import datetime
 
 class Album(models.Model):
     title = models.CharField(max_length=70)
@@ -18,7 +19,23 @@ class Album(models.Model):
     is_visible = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now_add=True)
-    slug = models.SlugField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=50, unique=True, editable=False)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            # Save first without slug to get an ID if needed
+            super().save(*args, **kwargs)
+            self.slug = self.generate_unique_slug()
+        self.is_visible = True
+        self.modified = datetime.now()
+        super().save(*args, **kwargs)
+
+    def generate_unique_slug(self):
+        base_slug = slugify(self.title)
+        if not base_slug:  # If title is empty or doesn't slugify well
+            base_slug = "album"
+        unique_slug = f"{base_slug}-{uuid.uuid4().hex[:6]}"
+        return unique_slug[:50]
 
     def average_rating(self):
         ratings = self.ratings.all()

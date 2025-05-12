@@ -33,6 +33,7 @@ def logout_view(request):
 def gallery(request):
     # Fetch albums where is_visible is True, ordered by 'created' in descending order
     albums_list = Album.objects.filter(is_visible=True).order_by('-created')
+    print(f"Found {albums_list.count()} visible albums")  # Debug line
     user_favorites = []
 
     if request.user.is_authenticated:
@@ -70,6 +71,8 @@ def gallery(request):
         'form': form,
         'user_favorites': user_favorites
     })
+
+
 class AlbumDetail(LoginRequiredMixin, DetailView):
     model = Album
     template_name = 'image_gallery_app/album_detail.html'
@@ -167,36 +170,42 @@ def create_album_view(request):
     if request.method == 'POST':
         form = AlbumForm(request.POST, request.FILES)
         if form.is_valid():
-            album = form.save(commit=False)
-            album.slug = slugify(f"{album.title}-{uuid.uuid4().hex[:6]}")
-            album.save()
+            try:
+                album = form.save(commit=False)
+                album.save()  # This triggers the slug generation
+                
+                if zip_file := form.cleaned_data.get('zip'):
+                    try:
+                        with zipfile.ZipFile(zip_file) as archive:
+                            for entry in sorted(archive.namelist()):
+                                if entry.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
+                                    file_data = archive.read(entry)
+                                    filename = os.path.basename(entry)
+                                    
+                                    with BytesIO(file_data) as buffer:
+                                        img = AlbumImage(album=album, alt=filename)
+                                        img.image.save(filename, ContentFile(file_data))
+                                        
+                                        image = Image.open(buffer)
+                                        img.width, img.height = image.size
+                                        
+                                        thumb_buffer = BytesIO()
+                                        image.thumbnail((300, 300))
+                                        image.save(thumb_buffer, format='JPEG', quality=90)
+                                        img.thumb.save(f"thumb_{filename}", ContentFile(thumb_buffer.getvalue()))
+                                        img.save()
+                    except zipfile.BadZipFile:
+                        messages.error(request, "Invalid ZIP file")
+                        return redirect('create_album')
 
-            zip_file = form.cleaned_data.get('zip')
-
-            if zip_file:
-                with zipfile.ZipFile(zip_file) as archive:
-                    for entry in archive.namelist():
-                        if entry.endswith(('.jpg', '.jpeg', '.png', '.webp')):
-                            file_data = archive.read(entry)
-                            filename = os.path.basename(entry)
-                            image_file = ContentFile(file_data, name=filename)
-
-                            # Create full-size image
-                            album_image = AlbumImage(album=album)
-                            album_image.image.save(filename, image_file)
-
-                            # Generate thumb manually (uses original image temporarily)
-                            album_image.thumb.save(f"thumb_{filename}", image_file)
-                            album_image.width, album_image.height = Image.open(BytesIO(file_data)).size
-                            album_image.save()
-
-            return redirect('album', slug=album.slug)
-
+                return redirect('album', slug=album.slug)
+            
+            except Exception as e:
+                messages.error(request, f"Error creating album: {str(e)}")
+                return redirect('create_album')
     else:
         form = AlbumForm()
-
     return render(request, 'create_album.html', {'form': form})
-
 from .models import Blog
 
 def blog_view(request):

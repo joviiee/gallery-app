@@ -28,7 +28,7 @@ urlpatterns = [
     re_path(r'^favicon\.ico$', RedirectView.as_view(url='/static/icons/favicon.ico', permanent=True)),
 
     # Keep this last!
-    path('<slug:slug>/', view.AlbumDetail.as_view(), name='album'),
+    path('albums/<slug:slug>/', view.AlbumDetail.as_view(), name='album'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 handler404 = 'image_gallery_app.views.handler404'

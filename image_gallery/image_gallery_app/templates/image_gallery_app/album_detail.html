@@ -12,41 +12,86 @@
       align-items: center;
       gap: 3px;
     }
-    
+
     .star-rating input[type="radio"] {
       display: none;
     }
-    
+
     .star-rating label.star {
       font-size: 20px;
       color: lightgray;
       cursor: pointer;
       transition: color 0.2s;
     }
-    
+
     .star-rating input[type="radio"]:checked ~ label.star,
     .star-rating label.star:hover,
     .star-rating label.star:hover ~ label.star {
       color: gold;
     }
-    
+
     .rating-form {
       display: flex;
       align-items: center;
       gap: 10px;
       margin-top: 10px;
     }
-    
+
     .rating-form .btn {
-        height: 24px;
-        line-height: 24px;
-        padding: 0 8px;
-        font-size: 0.7rem;
-        min-width: unset;
-        width:fit-content
+      height: 24px;
+      line-height: 24px;
+      padding: 0 8px;
+      font-size: 0.7rem;
+      min-width: unset;
+      width: fit-content;
+    }
+
+    /* Image grid layout */
+    .album-section {
+      width: 100%;
+      margin: 0;
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+
+    .album-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      padding: 20px 0;
+    }
+
+    @media (max-width: 1024px) {
+      .album-grid {
+        grid-template-columns: repeat(3, 1fr);
       }
-    </style>
-    
+    }
+
+    @media (max-width: 768px) {
+      .album-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .album-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .album-grid a {
+      display: block;
+      width: 100%;
+    }
+
+    .album-grid img {
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
+      object-fit: cover;
+      display: block;
+    }
+  </style>
 {% endblock %}
 
 {% block content %}
@@ -55,36 +100,36 @@
       <header class="col s12 m12 l10 offset-l1">
         <h1 style="font-weight:bold;font-size:60px;">{{ album.title }}</h1>
 
-{% if user.is_authenticated %}
-<form method="post" class="rating-form">
-    {% csrf_token %}
-    <div class="star-rating">
-        {% for i in rating_range %}
-          <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" {% if user_rating and user_rating.rating == i %}checked{% endif %}>
-          <label for="star{{ i }}" class="star">&#9733;</label>
-        {% endfor %}
-    </div>
-    <button type="submit" class="btn">Rate</button>
-</form>
-{% else %}
-<p><a href="{% url 'login' %}">Log in</a> to rate this album.</p>
-{% endif %}
-
-
-<p style="margin-top:10px;"><strong>Average Rating:</strong> {{ average_rating|floatformat:1 }} / 5</p>
-
-      </header>
-      <section class="col s12 m12 l10 offset-l1">
-        <p style="font-size:20px;padding-bottom:20px;">{{ album.description }}</p>
-
-        <div class="container">
-          <div class="row">
-            {% for item in images %}
-              <a class="col s12 m3" href="javascript:pswpInit({{ forloop.counter0 }});"><img src="{{ item.thumb.url }}" class="responsive-img dpg-album-image" alt="{{ item.alt }}" /></a>
+        {% if user.is_authenticated %}
+        <form method="post" class="rating-form">
+          {% csrf_token %}
+          <div class="star-rating">
+            {% for i in rating_range %}
+              <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" {% if user_rating and user_rating.rating == i %}checked{% endif %}>
+              <label for="star{{ i }}" class="star">&#9733;</label>
             {% endfor %}
           </div>
+          <button type="submit" class="btn">Rate</button>
+        </form>
+        {% else %}
+        <p><a href="{% url 'login' %}">Log in</a> to rate this album.</p>
+        {% endif %}
+
+        <p style="margin-top:10px;"><strong>Average Rating:</strong> {{ average_rating|floatformat:1 }} / 5</p>
+      </header>
+
+      <section class="album-section">
+        <p style="font-size:20px;padding-bottom:20px;">{{ album.description }}</p>
+
+        <div class="album-grid">
+          {% for item in images %}
+            <a href="javascript:pswpInit({{ forloop.counter0 }});">
+              <img src="{{ item.thumb.url }}" alt="{{ item.alt }}" />
+            </a>
+          {% endfor %}
         </div>
       </section>
+
       <footer class="col s12 m12 l10 offset-l1">
         Created on <time datetime="{{ album.created|date:'Y-m-d' }}">{{ album.created|date:'d M Y' }}</time>
         <p>Tags: {{ album.tags }}</p>
@@ -92,41 +137,21 @@
     </article>
 
     <!-- PhotoSwipe -->
-    <!-- Root element of PhotoSwipe. Must have class pswp. -->
     <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
-      <!--  Background of PhotoSwipe. 
-                 It's a separate element as animating opacity is faster than rgba().  -->
       <div class="pswp__bg"></div>
-
-      <!-- Slides wrapper with overflow:hidden. -->
       <div class="pswp__scroll-wrap">
-        <!--  Container that holds slides. 
-                    PhotoSwipe keeps only 3 of them in the DOM to save memory.
-                    Don't modify these 3 pswp__item elements, data is added later on.  -->
         <div class="pswp__container">
           <div class="pswp__item"></div>
           <div class="pswp__item"></div>
           <div class="pswp__item"></div>
         </div>
-
-        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
         <div class="pswp__ui pswp__ui--hidden">
           <div class="pswp__top-bar">
-            <!-- Controls are self-explanatory. Order can be changed. -->
-
             <div class="pswp__counter"></div>
-
             <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-
             <button class="pswp__button pswp__button--share" title="Share"></button>
-
             <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-
             <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
-
-            <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
-            <!-- element will get class pswp__preloader--a -->
-            ctive when preloader is running -->
             <div class="pswp__preloader">
               <div class="pswp__preloader__icn">
                 <div class="pswp__preloader__cut">
@@ -135,15 +160,11 @@
               </div>
             </div>
           </div>
-
           <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
             <div class="pswp__share-tooltip"></div>
           </div>
-
           <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button>
-
           <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button>
-
           <div class="pswp__caption">
             <div class="pswp__caption__center"></div>
           </div>
@@ -157,17 +178,16 @@
 
 {% block js %}
   <script>
-        // build the json album images collection 
-        window.djangoAlbumImages = [
-            {% for item in images %}
-                {
-                    src: '{{ item.image.url }}',
-                    w:  {{ item.width }},
-                    h:  {{ item.height }}
-                },
-            {% endfor %}
-        ];
-    </script>
+    window.djangoAlbumImages = [
+      {% for item in images %}
+        {
+          src: '{{ item.image.url }}',
+          w: {{ item.width }},
+          h: {{ item.height }}
+        },
+      {% endfor %}
+    ];
+  </script>
   <script src="{% static 'external/photoswipe/photoswipe.min.js' %}"></script>
   <script src="{% static 'external/photoswipe/photoswipe-ui-default.min.js' %}"></script>
 {% endblock %}

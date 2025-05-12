@@ -18,41 +18,36 @@ from image_gallery_app.forms import AlbumForm
 @admin.register(Album)
 class AlbumModelAdmin(admin.ModelAdmin):
     form = AlbumForm
-    prepopulated_fields = {'slug': ('title',)}
+    # Remove prepopulated_fields since we're auto-generating
     list_display = ('title', 'thumb')
     list_filter = ('created',)
 
     def save_model(self, request, obj, form, change):
-        if form.is_valid():
-            album = form.save(commit=False)
-            album.modified = datetime.now()
-            album.save()
-
-            if form.cleaned_data['zip'] != None:
-                zip = zipfile.ZipFile(form.cleaned_data['zip'])
-                for filename in sorted(zip.namelist()):
-
+        # Let the model's save() handle slug generation and modified date
+        super().save_model(request, obj, form, change)
+        
+        if form.cleaned_data.get('zip'):
+            with zipfile.ZipFile(form.cleaned_data['zip']) as zip_file:
+                for filename in sorted(zip_file.namelist()):
                     file_name = os.path.basename(filename)
                     if not file_name:
                         continue
 
-                    data = zip.read(filename)
+                    data = zip_file.read(filename)
                     contentfile = ContentFile(data)
 
                     img = AlbumImage()
-                    img.album = album
+                    img.album = obj
                     img.alt = filename
-                    filename = '{0}{1}.jpg'.format(album.slug, str(uuid.uuid4())[-13:])
+                    filename = f'{obj.slug}{str(uuid.uuid4())[-13:]}.jpg'
                     img.image.save(filename, contentfile)
                 
-                    filepath = '{0}/albums/{1}'.format(settings.MEDIA_ROOT, filename)
-                    with Image.open(filepath) as i:
-                        img.width, img.height = i.size
+                    filepath = f'{settings.MEDIA_ROOT}/albums/{filename}'
+                    with Image.open(filepath) as image:
+                        img.width, img.height = image.size
 
-                    img.thumb.save('thumb-{0}'.format(filename), contentfile)
+                    img.thumb.save(f'thumb-{filename}', contentfile)
                     img.save()
-                zip.close() 
-            super(AlbumModelAdmin, self).save_model(request, obj, form, change)
 
 # In case image should be removed from album.
 @admin.register(AlbumImage)
