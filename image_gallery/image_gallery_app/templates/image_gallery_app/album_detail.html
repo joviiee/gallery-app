@@ -79,6 +79,16 @@
       }
     }
 
+    .image-wrapper {
+  aspect-ratio: 1 / 1; /* Force square layout */
+  overflow: hidden;
+  border-radius: 8px;
+  background-color: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
     .album-grid a {
       display: block;
       width: 100%;
@@ -97,44 +107,47 @@
 {% block content %}
   {% if album.is_visible %}
     <article class="row">
-      <header class="col s12 m12 l10 offset-l1">
-        <h1 style="font-weight:bold;font-size:60px;">{{ album.title }}</h1>
+  <div class="col s12 m12 l10 offset-l1">
+    <header>
+      <h1 style="font-weight:bold;font-size:60px;color:antiquewhite;">{{ album.title }}</h1>
 
-        {% if user.is_authenticated %}
-        <form method="post" class="rating-form">
-          {% csrf_token %}
-          <div class="star-rating">
-            {% for i in rating_range %}
-              <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" {% if user_rating and user_rating.rating == i %}checked{% endif %}>
-              <label for="star{{ i }}" class="star">&#9733;</label>
-            {% endfor %}
-          </div>
-          <button type="submit" class="btn">Rate</button>
-        </form>
-        {% else %}
-        <p><a href="{% url 'login' %}">Log in</a> to rate this album.</p>
-        {% endif %}
-
-        <p style="margin-top:10px;"><strong>Average Rating:</strong> {{ average_rating|floatformat:1 }} / 5</p>
-      </header>
-
-      <section class="album-section">
-        <p style="font-size:20px;padding-bottom:20px;">{{ album.description }}</p>
-
-        <div class="album-grid">
-          {% for item in images %}
-            <a href="javascript:pswpInit({{ forloop.counter0 }});">
-              <img src="{{ item.thumb.url }}" alt="{{ item.alt }}" />
-            </a>
+      {% if user.is_authenticated %}
+      <form method="post" class="rating-form">
+        {% csrf_token %}
+        <div class="star-rating">
+          {% for i in rating_range %}
+            <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" {% if user_rating and user_rating.rating == i %}checked{% endif %}>
+            <label for="star{{ i }}" class="star">&#9733;</label>
           {% endfor %}
         </div>
-      </section>
+        <button type="submit" class="btn">Rate</button>
+      </form>
+      {% else %}
+      <p><a href="{% url 'login' %}">Log in</a> to rate this album.</p>
+      {% endif %}
 
-      <footer class="col s12 m12 l10 offset-l1">
-        Created on <time datetime="{{ album.created|date:'Y-m-d' }}">{{ album.created|date:'d M Y' }}</time>
-        <p>Tags: {{ album.tags }}</p>
-      </footer>
-    </article>
+      <p style="margin-top:10px;color:antiquewhite;">
+        <strong style="color:antiquewhite;">Average Rating:</strong> {{ average_rating|floatformat:1 }} / 5
+      </p>
+    </header>
+
+    <section class="album-section">
+      <p style="font-size:20px;padding-bottom:20px;color:antiquewhite;text-align: justify;">
+        {{ album.description }}
+      </p>
+
+      <div class="album-grid">
+        {% for item in images %}
+        <div class="image-wrapper">
+          <a href="javascript:pswpInit({{ forloop.counter0 }});">
+            <img src="{{ item.thumb.url }}" alt="{{ item.alt }}" />
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</article>
 
     <!-- PhotoSwipe -->
     <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
