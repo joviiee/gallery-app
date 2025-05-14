@@ -80,13 +80,46 @@
     }
 
     .image-wrapper {
-  aspect-ratio: 1 / 1; /* Force square layout */
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   border-radius: 8px;
   background-color: #eee;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+}
+
+.image-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 6px;
+}
+
+/* Heart button styling */
+.image-favorite-form {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+.image-favorite-form button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.image-favorite-form i {
+  font-size: 24px;
+  color: red;
 }
 
     .album-grid a {
@@ -139,9 +172,23 @@
       <div class="album-grid">
         {% for item in images %}
         <div class="image-wrapper">
-          <a href="javascript:pswpInit({{ forloop.counter0 }});">
-            <img src="{{ item.thumb.url }}" alt="{{ item.alt }}" />
-          </a>
+          <div class="image-container">
+            <a href="javascript:pswpInit({{ forloop.counter0 }});">
+              <img src="{{ item.thumb.url }}" alt="{{ item.alt }}" />
+            </a>
+            {% if user.is_authenticated %}
+              <form method="post" action="{% url 'toggle_favorite_image' item.id %}" class="image-favorite-form">
+                {% csrf_token %}
+                <button type="submit" class="fav-btn" title="Toggle Favorite">
+                  {% if item.id in favorite_image_ids %}
+                    <i class="fas fa-heart" style="color: red; font-size: 20px;"></i>
+                  {% else %}
+                    <i class="far fa-heart" style="color: white; font-size: 20px;"></i>
+                  {% endif %}
+                </button>
+              </form>
+            {% endif %}
+          </div>
         </div>
         {% endfor %}
       </div>

@@ -108,3 +108,11 @@ class Favorite(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, default=get_default_content_type)
     object_id = models.PositiveIntegerField(null=True)
     content_object = GenericForeignKey('content_type', 'object_id')
+
+class FavoriteImage(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    image = models.ForeignKey(AlbumImage, on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'image')  # Prevent duplicates

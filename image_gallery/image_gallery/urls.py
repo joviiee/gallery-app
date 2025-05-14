@@ -23,6 +23,7 @@ urlpatterns = [
     path('favourites/', view.favorites_view, name='favourites'),
     path('favorite/<str:item_type>/<int:item_id>/', view.toggle_favorite, name='toggle_favorite'),
     path('feedback-success/', view.feedback_success, name='feedback_success'),  # Success page URL
+    path('toggle-favorite/image/<int:image_id>/', view.toggle_favorite_image, name='toggle_favorite_image'),
 
     path('', view.gallery, name='gallery'),
     re_path(r'^favicon\.ico$', RedirectView.as_view(url='/static/icons/favicon.ico', permanent=True)),

@@ -5,12 +5,12 @@ import zipfile
 import uuid
 from io import BytesIO
 from django.shortcuts import render,redirect,get_object_or_404
-from django.http import HttpRequest
+from django.http import HttpRequest, JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import DetailView
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, logout, authenticate,get_user
-from image_gallery_app.models import Album, AlbumImage ,AlbumRating
+from image_gallery_app.models import Album, AlbumImage ,AlbumRating, FavoriteImage
 from .forms import SignupForm, LoginForm, FeedbackForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -18,6 +18,7 @@ from django.utils.text import slugify
 from django.core.files.base import ContentFile
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.mixins import LoginRequiredMixin
+
 
 from PIL import Image
 
@@ -93,6 +94,11 @@ class AlbumDetail(LoginRequiredMixin, DetailView):
         user_rating = None
         if user.is_authenticated:
             user_rating = AlbumRating.objects.filter(user=user, album=album).first()
+            favorite_image_ids = FavoriteImage.objects.filter(
+                user=self.request.user,
+                image__in=album.albumimage_set.all()
+            ).values_list('image_id', flat=True)
+            context['favorite_image_ids'] = set(favorite_image_ids)
         context['user_rating'] = user_rating
 
         # Average Rating
@@ -112,6 +118,19 @@ class AlbumDetail(LoginRequiredMixin, DetailView):
                 defaults={'rating': rating}
             )
             return redirect(self.request.path_info)  # refresh page
+        if 'favorite_image' in request.POST:
+            image_id = request.POST.get('favorite_image')
+            try:
+                image = AlbumImage.objects.get(id=image_id)
+                fav, created = FavoriteImage.objects.get_or_create(
+                    user=request.user,
+                    image=image
+                )
+                if not created:
+                    fav.delete()
+                return JsonResponse({'status': 'success'})
+            except AlbumImage.DoesNotExist:
+                return JsonResponse({'status': 'error'}, status=404)
 
         else:
             # Feedback form submitted
@@ -272,6 +291,12 @@ def favorites_view(request):
         id__in=Favorite.objects.filter(user=request.user, content_type=ContentType.objects.get_for_model(Blog)).values('object_id')
     )
 
+    fav_images = AlbumImage.objects.filter(
+        id__in=FavoriteImage.objects.filter(
+            user=request.user
+        ).values_list('image_id', flat=True)
+    ).select_related('album')
+
     # Handle form submission (POST)
     if request.method == 'POST':
         form = FeedbackForm(request.POST)
@@ -286,6 +311,7 @@ def favorites_view(request):
     return render(request, 'favorites.html', {
         'fav_albums': fav_albums,
         'fav_blogs': fav_blogs,
+        'fav_images': fav_images,
         "form":form
     })
 
@@ -302,3 +328,21 @@ def blog_detail(request, slug):
     else:
         form = FeedbackForm()  # Display an empty form on GET request
     return render(request, 'blog_detail.html', {'blog': blog,"form":form})
+
+
+@login_required
+def toggle_favorite_image(request, image_id):
+    image = get_object_or_404(AlbumImage, id=image_id)
+    
+    # Get or create favorite
+    fav, created = FavoriteImage.objects.get_or_create(
+        user=request.user,
+        image=image
+    )
+    
+    # If it already existed, delete it (toggle)
+    if not created:
+        fav.delete()
+    
+    # Redirect back to the album page
+    return redirect('album', slug=image.album.slug)
