@@ -24,7 +24,7 @@ from PIL import Image
 
 from .forms import AlbumForm
 
-from image_gallery_app.models import Album, AlbumImage ,Blog, Favorite
+from image_gallery_app.models import Album, AlbumImage, Blog, Favorite
 
 
 def logout_view(request):
@@ -43,7 +43,7 @@ def gallery(request):
             user=request.user,
             content_type=album_type
         ).values_list('object_id', flat=True)
-    
+
     # Set up pagination: 10 albums per page
     paginator = Paginator(albums_list, 10)
     page = request.GET.get('page')
@@ -59,6 +59,7 @@ def gallery(request):
     if request.method == 'POST':
         form = FeedbackForm(request.POST)
         if form.is_valid():
+            form.save() 
             # Optionally, save the form data to a model or send an email
             # Redirect to the feedback success page after form submission
             return redirect('feedback_success')  # Redirect to the success page
@@ -136,6 +137,7 @@ class AlbumDetail(LoginRequiredMixin, DetailView):
             # Feedback form submitted
             form = FeedbackForm(request.POST)
             if form.is_valid():
+                form.save() 
                 # Save or process the feedback as needed
                 return redirect('feedback_success')
             
@@ -242,6 +244,7 @@ def blog_view(request):
     if request.method == 'POST':
         form = FeedbackForm(request.POST)
         if form.is_valid():
+            form.save() 
             # Optionally, save the form data to a model or send an email
             # Redirect to the feedback success page after form submission
             return redirect('feedback_success')  # Redirect to the success page
@@ -301,6 +304,7 @@ def favorites_view(request):
     if request.method == 'POST':
         form = FeedbackForm(request.POST)
         if form.is_valid():
+            form.save() 
             # Optionally, save the form data to a model or send an email
             # Redirect to the feedback success page after form submission
             return redirect('feedback_success')  # Redirect to the success page
@@ -321,6 +325,7 @@ def blog_detail(request, slug):
     if request.method == 'POST':
         form = FeedbackForm(request.POST)
         if form.is_valid():
+            form.save() 
             # Optionally, save the form data to a model or send an email
             # Redirect to the feedback success page after form submission
             return redirect('feedback_success')  # Redirect to the success page
